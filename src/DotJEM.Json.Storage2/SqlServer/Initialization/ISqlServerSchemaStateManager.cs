@@ -7,7 +7,7 @@ public interface ISqlServerSchemaStateManager
 {
     string Schema { get; }
 
-    Task Ensure();
+    Task<bool> Ensure();
 }
 
 public class SqlServerSchemaStateManager : ISqlServerSchemaStateManager
@@ -25,12 +25,15 @@ public class SqlServerSchemaStateManager : ISqlServerSchemaStateManager
         this.created = created;
     }
 
-    public async Task Ensure()
+    public async Task<bool> Ensure()
     {
         if (created)
-            return;
+            return created;
 
         await padlock.WaitAsync();
+
+        if (created)
+            return created;
 
         string commandText = SqlTemplates.CreateSchema(Schema);
 
@@ -46,7 +49,11 @@ public class SqlServerSchemaStateManager : ISqlServerSchemaStateManager
 
         created = true;
         padlock.Release();
+
+        return created;
     }
+
+
 }
 
 public class SqlServerAreaStateManager : ISqlServerSchemaStateManager
@@ -68,14 +75,15 @@ public class SqlServerAreaStateManager : ISqlServerSchemaStateManager
     }
 
 
-    public async Task Ensure()
+    public async Task<bool> Ensure()
     {
         if (created)
-            return;
+            return created;
 
         await padlock.WaitAsync();
+
         if (created)
-            return;
+            return created;
 
         string dataTableCommandText = SqlTemplates.CreateDataTable(Schema, AreaName);//  SqlServerStatements.Load("CreateDataTable", map);
         string logTableCommandText = SqlTemplates.CreateLogTable(Schema, AreaName); // SqlServerStatements.Load("CreateLogTable", map);
@@ -95,6 +103,8 @@ public class SqlServerAreaStateManager : ISqlServerSchemaStateManager
 
         created = true;
         padlock.Release();
+
+        return created;
     }
 
     private async Task Execute(string commandText, SqlConnection connection, SqlTransaction transaction)

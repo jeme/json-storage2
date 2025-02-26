@@ -38,7 +38,7 @@ public class SqlServerStorageAreaFactory
         this.areas = areas ?? new Dictionary<string, AreaInfo>();
     }
 
-    public async Task<SqlServerStorageArea> Create(string name, SqlServerStorageContext context)
+    public async Task<SqlServerStorageArea<TJson>> Create<TJson>(string name, SqlServerStorageContext<TJson> context) 
     {
         await schema.Ensure();
         if (areas.TryGetValue(name, out AreaInfo? areaInfo))
