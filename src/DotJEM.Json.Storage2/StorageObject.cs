@@ -1,11 +1,14 @@
 ﻿namespace DotJEM.Json.Storage2;
 
 
+public readonly record struct StorageChange<TJson>(long Revision, Guid Id, char Event, int Version, DateTime Time, string User, TJson Data)
+{
+
+}
+
 /// <summary/>
-public readonly record struct StorageObject<TJson>(
-    string ContentType, Guid Id, int Version,
-    DateTime Created, DateTime Updated, string CreatedBy, string UpdatedBy,
-    TJson Data) {
+public readonly record struct StorageObject<TJson>(string ContentType, Guid Id, int Version, DateTime Created, DateTime Updated, string CreatedBy,
+    string UpdatedBy, TJson Data) {
 
     /// <summary/>
     public override string ToString()

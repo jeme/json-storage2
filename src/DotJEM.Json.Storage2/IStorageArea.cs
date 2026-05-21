@@ -23,3 +23,41 @@ public interface IStorageArea<TJson>
     Task<StorageObject<TJson>?> DeleteAsync(Guid id);
     Task<StorageObject<TJson>?> DeleteAsync(Guid id, CancellationToken cancellation);
 }
+
+public readonly record struct ChangeCount(int Created, int Updated, int Deleted)
+{
+    public int Total { get; } = Created + Updated + Deleted;
+
+    public static ChangeCount operator +(ChangeCount left, ChangeCount right)
+    {
+        return new ChangeCount(
+            left.Created + right.Created,
+            left.Updated + right.Updated,
+            left.Deleted + right.Deleted);
+    }
+
+    public static implicit operator int(ChangeCount count)
+    {
+        return count.Total;
+    }
+
+    public override string ToString()
+    {
+        return $"Created: {Created}, Updated: {Updated}, Deleted: {Deleted}";
+    }
+}
+
+public interface IStorageAreaChangeCollection<TJson>
+{
+
+}
+
+public interface IStorageAreaLog<TJson>
+{
+    
+}
+
+public interface IStorageAreaLogObserver<TJson>
+{
+
+}

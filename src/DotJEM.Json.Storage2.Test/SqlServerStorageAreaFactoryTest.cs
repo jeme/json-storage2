@@ -91,4 +91,22 @@ public class SqlServerStorageContextIntegrationTest
 
     }
 
+    [Test, Explicit]
+    public async Task GetAsync_ChangeLog()
+    {
+        IStorageContext<JObject> context = await new SqlServerStorageContextBuilder<JObject>(TestSqlConnectionFactory.ConnectionString, new NewtonsoftJsonConverter())
+            .ForSchema("fox")
+            .Build();
+        IStorageArea<JObject> area = await context.AreaAsync("test");
+
+
+        await area.InsertAsync("na", JObject.FromObject(new { track = "T-01" }));
+        await area.InsertAsync("na", JObject.FromObject(new { track = "T-02" }));
+        await area.InsertAsync("na", JObject.FromObject(new { track = "T-03" }));
+        await foreach (StorageObject<JObject> obj in area.GetAsync())
+        {
+            Console.WriteLine(obj);
+        }
+    }
+
 }
